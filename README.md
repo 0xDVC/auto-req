@@ -31,3 +31,29 @@ Auto-Req won't update requirements.txt when:
 - Installing from git repositories
 - Installing from local files
 - Using editable installs (`-e` flag)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/[name]`)
+3. Run tests (`pytest`)
+4. Commit changes (`git commit -m 'Add [feature]'`)
+5. Push to branch (`git push origin feature/[name]`)
+6. Open a Pull Request
+
+## Testing
+
+Run the test suite using pytest:
+
+```bash
+# Install dev dependencies
+pip install -e ".[dev]"
+
+# Run tests
+pytest
+
+# Run with coverage
+pytest --cov=auto_req
+```
+
+Tests are located in the `tests/` directory and follow the pytest conventions.

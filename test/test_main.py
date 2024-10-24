@@ -20,12 +20,13 @@ def test_is_valid_package():
 
 def test_update_requirements_remove(tmp_path):
     req_file = tmp_path / "requirements.txt"
-    req_file.write_text("requests\nflask\n")
+    req_file.write_text("requests==2.31.0\nflask\n")  # Added version number
     
     auto = AutoReq(str(tmp_path))
     
-    auto.update_requirements("requests", remove=True)
+    auto.update_requirements("requests", remove=True)  # Should remove regardless of version
     
     packages = auto._read_requirements()
     assert "requests" not in packages
+    assert not any("requests" in pkg for pkg in packages)  # Ensure no version of requests exists
     assert "flask" in packages
