@@ -60,6 +60,8 @@ def main():
             auto = AutoReq()
             cmd = sys.argv[1] if len(sys.argv) > 1 else ''
             
+            print(f"Processing command: {cmd}")  # Debug info
+            
             if cmd == 'install':
                 for arg in sys.argv[2:]:
                     if not arg.startswith('-'):
@@ -68,7 +70,11 @@ def main():
                 for arg in sys.argv[2:]:
                     if not arg.startswith('-'):
                         auto.update_requirements(arg, remove=True)
-                    
+            
+            # Verify requirements file exists after operations
+            if not auto.req_file.exists():
+                print("Warning: requirements.txt was not created!", file=sys.stderr)
+                
         sys.exit(result.returncode)
         
     except subprocess.SubprocessError as e:
@@ -78,7 +84,7 @@ def main():
         print(f"File operation failed: {e}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
-        print(f"Unexpected error: {e}", file=sys.stderr)
+        print(f"Error in auto-req: {e}", file=sys.stderr)
         sys.exit(1)
 
 if __name__ == '__main__':
