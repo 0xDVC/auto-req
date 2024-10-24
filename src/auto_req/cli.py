@@ -4,6 +4,7 @@ from .main import AutoReq
 import site
 from pathlib import Path
 
+
 def is_externally_managed() -> bool:
     """Check if Python environment is externally managed (Python 3.12+)."""
     major, minor = sys.version_info[:2]
@@ -32,12 +33,13 @@ def main():
     Handles install/uninstall commands while managing external environment flags.
     Exits with pip's return code or 1 on error.
     """
+
     try:
         external = is_externally_managed()
         if external:
             print("Warning: Operating in an externally managed environment", file=sys.stderr)
 
-        capture_output = sys.argv[1] != "uninstall" if len(sys.argv) > 1 else True
+        # capture_output = sys.argv[1] != "uninstall" if len(sys.argv) > 1 else True
         
         # Add --break-system-packages only if needed (for external environments)
         pip_args = sys.argv[1:]
@@ -46,21 +48,24 @@ def main():
         
         result = subprocess.run(
             [sys.executable, '-m', 'pip'] + pip_args,
-            capture_output=capture_output,
+            # capture_output=capture_output,
             text=True
         )
         
-        if capture_output:
-            if result.stdout:
-                print(result.stdout)
-            if result.stderr:
-                print(result.stderr, file=sys.stderr)
+        # if capture_output:
+        #     if result.stdout:
+        #         print(result.stdout)
+        #     if result.stderr:
+        #         print(result.stderr, file=sys.stderr)
             
         if result.returncode == 0:
             auto = AutoReq()
+
             cmd = sys.argv[1] if len(sys.argv) > 1 else ''
-            
-            print(f"Processing command: {cmd}")  # Debug info
+
+            if cmd == 'install' and 'auto-req' in sys.argv[2:]:
+                auto.post_install()
+                return
             
             if cmd == 'install':
                 for arg in sys.argv[2:]:
@@ -71,10 +76,9 @@ def main():
                     if not arg.startswith('-'):
                         auto.update_requirements(arg, remove=True)
             
-            # Verify requirements file exists after operations
             if not auto.req_file.exists():
                 print("Warning: requirements.txt was not created!", file=sys.stderr)
-                
+
         sys.exit(result.returncode)
         
     except subprocess.SubprocessError as e:
