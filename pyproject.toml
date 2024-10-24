@@ -29,6 +29,6 @@ classifiers = [
 pip = "auto_req.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/yourusername/pipauto"
-Repository = "https://github.com/yourusername/pipauto.git"
-Issues = "https://github.com/yourusername/pipauto/issues"
+Homepage = "https://github.com/0xDVC/auto-req"
+Repository = "https://github.com/0xDVC/auto-req.git"
+Issues = "https://github.com/0xDVC/auto-req/issues"

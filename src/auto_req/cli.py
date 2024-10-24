@@ -16,7 +16,7 @@ def main():
         if result.stderr:
             print(result.stderr, file=sys.stderr)
             
-        # Only process if pip command succeeded
+        # Only process if pip command succeeds
         if result.returncode == 0:
             auto = AutoReq()
             cmd = sys.argv[1] if len(sys.argv) > 1 else ''
