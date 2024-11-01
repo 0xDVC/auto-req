@@ -16,7 +16,17 @@ if [ "$1" = "uninstall" ]; then
     else
         SHELL_CONFIG="$HOME/.bashrc"
     fi
-    --
+    for cmd in pip pip3; do
+        WRAPPER_PATH="$WRAPPER_DIR/$cmd-wrapper.sh"
+        if [ -f "$WRAPPER_PATH" ]; then
+            rm "$WRAPPER_PATH"
+            echo "Removed $cmd wrapper"
+        fi
+        if grep -q "alias $cmd=" "$SHELL_CONFIG"; then
+            sed -i.bak "/alias $cmd=/d" "$SHELL_CONFIG"
+            echo "Removed $cmd alias from $SHELL_CONFIG"
+        fi
+    done
     echo "areq uninstalled"
     exit 0
 fi
