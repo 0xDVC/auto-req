@@ -13,7 +13,7 @@ You need Python 3.6+ and `pip`. Run this to install:
 
 ```bash
 # unix shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/0xdvc/auto-req/main/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/0xdvc/auto-req/main/scripts/install.sh)"
 ```
 
 
