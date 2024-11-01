@@ -35,3 +35,23 @@ if [ $? -ne 0 ]; then
     echo "Install failed. Check network or pip setup."
     exit 1
 fi
+
+# set up wrappers and aliases
+WRAPPER_DIR="$HOME/.local/bin"
+if [ -n "$ZSH_VERSION" ]; then
+    SHELL_CONFIG="$HOME/.zshrc"
+else
+    SHELL_CONFIG="$HOME/.bashrc"
+fi
+for cmd in pip pip3; do
+    if ! grep "alias $cmd=" "$SHELL_CONFIG"; then
+        echo "alias $cmd='$WRAPPER_DIR/$cmd-wrapper.sh'" >> "$SHELL_CONFIG"
+        echo "Added $cmd alias to $SHELL_CONFIG"
+    else
+        echo "$cmd alias already exists in $SHELL_CONFIG"
+    fi
+done
+echo "Run 'source $SHELL_CONFIG' to apply changes"
+
+echo "areq installed. It’ll auto-sync requirements.txt when you use pip or pip3."
+echo "To uninstall: $0 uninstall"
