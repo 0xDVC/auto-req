@@ -1,80 +1,69 @@
 #!/bin/bash
+# scripts/wrappers/pip3-wrapper.sh
 
-# Check if pip is installed
-if ! command -v pip && ! command -v pip3; then
-    echo "Error: pip or pip3 not found. Install Python and pip first."
+ORIG_PIP="$(dirname "$0")/$(basename "$0")-orig"
+
+if [ ! -f "$ORIG_PIP" ]; then
+    echo "Error: Original pip ($ORIG_PIP) not found. Please reinstall areq."
     exit 1
 fi
 
-# Uninstall if requested
-if [ "$1" = "uninstall" ]; then
-    echo "Uninstalling areq..."
-    pip uninstall areq -y || pip3 uninstall areq -y
-    # Detect virtual env
-    if [ -n "$VIRTUAL_ENV" ]; then
-        WRAPPER_DIR="$VIRTUAL_ENV/bin"
-    else
-        WRAPPER_DIR="$HOME/.local/bin"
-    fi
-    if [ -n "$ZSH_VERSION" ]; then
-        SHELL_CONFIG="$HOME/.zshrc"
-    else
-        SHELL_CONFIG="$HOME/.bashrc"
-    fi
-    for cmd in pip pip3; do
-        WRAPPER_PATH="$WRAPPER_DIR/areq-$cmd-wrapper.sh"
-        if [ -f "$WRAPPER_PATH" ]; then
-            rm "$WRAPPER_PATH"
-            echo "Removed $cmd wrapper"
+# Run the original pip command
+"$ORIG_PIP" "$@"
+EXIT_CODE=$?
+
+# Update requirements.txt on install or uninstall
+if [ $EXIT_CODE -eq 0 ] && { [[ "$1" == "install" ]] || [[ "$1" == "uninstall" ]]; }; then
+    "$ORIG_PIP" list --format=freeze | grep -v "^-e" | grep -v "^#" | grep -v "git+" | sort > requirements.txt
+    echo "Updated requirements.txt with current packages."
+fi
+
+# Cleanup function for pip wrappers
+cleanup_pip() {
+    local cmd="$1"
+    local BIN_DIR="$(dirname "$0")"
+    local wrapper_path="$BIN_DIR/$cmd"
+    local orig_path="$BIN_DIR/$cmd-orig"
+
+    echo "Checking $wrapper_path"
+    if [ -f "$wrapper_path" ]; then
+        if grep -q "ORIG_PIP" "$wrapper_path" 2>/dev/null; then
+            rm -f "$wrapper_path"
+            echo "Removed wrapper: $wrapper_path"
+        else
+            echo "Skipping $wrapper_path - not our wrapper"
         fi
-        if [ -f "$SHELL_CONFIG" ] && grep -q "alias $cmd=" "$SHELL_CONFIG"; then
-            sed -i.bak "/alias $cmd=/d" "$SHELL_CONFIG"
-            echo "Removed $cmd alias from $SHELL_CONFIG"
-        fi
-    done
-    echo "areq uninstalled"
-    exit 0
-fi
-
-# Check Python version
-PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))' || python -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-if [ "$(echo -e "3.6\n$PYTHON_VERSION" | sort -V | head -n1)" != "3.6" ]; then
-    echo "Error: Python 3.6+ needed, got $PYTHON_VERSION"
-    exit 1
-fi
-
-# Install areq from GitHub, adjust for virtual env
-echo "Installing areq from GitHub..."
-if [ -n "$VIRTUAL_ENV" ]; then
-    pip install git+https://github.com/0xdvc/auto-req.git || pip3 install git+https://github.com/0xdvc/auto-req.git
-else
-    pip install git+https://github.com/0xdvc/auto-req.git --user || pip3 install git+https://github.com/0xdvc/auto-req.git --user
-fi
-if [ $? -ne 0 ]; then
-    echo "Install failed. Check network or pip setup."
-    exit 1
-fi
-
-# Set up wrappers and aliases
-if [ -n "$VIRTUAL_ENV" ]; then
-    WRAPPER_DIR="$VIRTUAL_ENV/bin"
-else
-    WRAPPER_DIR="$HOME/.local/bin"
-fi
-if [ -n "$ZSH_VERSION" ]; then
-    SHELL_CONFIG="$HOME/.zshrc"
-else
-    SHELL_CONFIG="$HOME/.bashrc"
-fi
-for cmd in pip pip3; do
-    if ! grep "alias $cmd=" "$SHELL_CONFIG"; then
-        echo "alias $cmd='$WRAPPER_DIR/areq-$cmd-wrapper.sh'" >> "$SHELL_CONFIG"
-        echo "Added $cmd alias to $SHELL_CONFIG"
     else
-        echo "$cmd alias already exists in $SHELL_CONFIG"
+        echo "No wrapper found at $wrapper_path"
     fi
-done
-echo "Run 'source $SHELL_CONFIG' to apply changes"
 
-echo "areq installed. It’ll auto-sync requirements.txt when you use pip or pip3."
-echo "To uninstall: bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/0xdvc/auto-req/main/install.sh)\" uninstall"
+    echo "Checking $orig_path"
+    if [ -f "$orig_path" ]; then
+        mv "$orig_path" "$wrapper_path"
+        echo "Restored original: $wrapper_path from $orig_path"
+    else
+        echo "No original found at $orig_path"
+    fi
+
+    if [ -f "$orig_path" ]; then
+        rm -f "$orig_path"
+        echo "Force removed lingering original: $orig_path"
+    fi
+}
+
+# If uninstalling areq, clean up wrappers and originals
+if [ $EXIT_CODE -eq 0 ] && [ "$1" == "uninstall" ] && [[ "$2" == "areq" || "$3" == "areq" ]]; then
+    echo "Detected uninstall of areq, running cleanup"
+    cleanup_pip "pip"
+    cleanup_pip "pip3"
+    # Final requirements.txt update with restored pip
+    if [ -f "$(dirname "$0")/pip" ]; then
+        "$(dirname "$0")/pip" list --format=freeze | grep -v "^-e" | grep -v "^#" | grep -v "git+" | sort > requirements.txt
+        echo "Final update to requirements.txt with restored pip"
+    else
+        echo "Warning: Restored pip not found, skipping final requirements.txt update"
+    fi
+    echo "Cleanup complete"
+fi
+
+exit $EXIT_CODE
