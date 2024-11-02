@@ -1,5 +1,4 @@
 #!/bin/bash
-# scripts/wrappers/pip3-wrapper.sh
 
 ORIG_PIP="$(dirname "$0")/$(basename "$0")-orig"
 
