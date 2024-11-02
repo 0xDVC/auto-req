@@ -70,8 +70,8 @@ setup(
     name="areq",
     version="0.1.0",
     description="A tool to auto manage requirements.txt by intercepting pip commands",
-    author="Your Name",
-    author_email="your.email@example.com",
+    author="0xdvc",
+    author_email="neilohene@gmail.com",
     url="https://github.com/0xdvc/auto-req",
     packages=find_packages(),
     package_data={

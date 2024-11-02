@@ -1,7 +1,7 @@
 # Auto-Req (areq)
 ## Overview
 `areq` is a simple command-line tool that keeps your `requirements.txt` file up to date. It wraps around `pip` and automatically adds or removes packages when you install or uninstall them.
-As someone who enjoys the simplicity of pip for managing my environments and not having to stress about the state of my `requirements.txt` file, I created `areq` to automate this process. It's a small tool that makes a big difference in my workflow, and I hope it does the same for you.
+As someone who enjoys the simplicity of `pip` for managing my environments and not having to stress about the state of my `requirements.txt` file, I created `areq` to automate this process. It's a small tool that makes a big difference in my workflow, and I hope it does the same for you.
 
 ## Features
 - Updates `requirements.txt` when you install/uninstall packages **automatically**.
@@ -13,16 +13,23 @@ You need Python 3.6+ and `pip`. Run this to install:
 
 ```bash
 # unix shell
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/0xdvc/auto-req/main/scripts/install.sh)"
+bash <(curl -sL https://raw.githubusercontent.com/0xdvc/auto-req/main/scripts/install.sh)
 ```
 
+## Uninstallation
+```bash
+# unix shell
+pip uninstall areq # that simple :)
+```
 
-## Usage
+## Things to note before using `areq`
 - After installation, it should generate a requirements.txt file if it doesn't exist and track all packages you install via `pip`.
 - All previous installations are tracked on installation and further installations and uninstallations are tracked.
 - Uninstalling a package will remove it from the requirements.txt file.
 
-
+## Limitations
+- `areq` only tracks packages installed via `pip`. If you install packages via other means, you will have to manually update the requirements.txt file.
+- `areq` does not track the package's extras. It only tracks the package name. (I do think it's great though for now, I can't tell for now what other packages rely on those extras. you could have co-dependencies on those extras)
 
 ## Resources
 - Introduction to Bash scripting - [By Bobby Iliev](https://ebook.bobby.sh/#download)
