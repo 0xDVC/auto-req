@@ -6,17 +6,23 @@ import subprocess
 from setuptools import setup, find_packages
 from setuptools.command.install import install
 
+# lot's of skill issues ngl, welp!
+# TODO: properly document this
+# AI assistance is great, but if you do touch this(nothing special here though, please be careful, I lack the proper prompting skills to handle AI generated code.
 class AutoReq(install):
     def run(self):
         install.run(self)
 
+        # check if vitrual enviroment is active
         if hasattr(sys, 'real_prefix') or (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix):
             wrapper_dir = os.path.join(sys.prefix, 'bin' if sys.platform in ('linux', 'darwin') else 'Scripts')
         else:
             wrapper_dir = os.path.expanduser('~/.local/bin') if sys.platform in ('linux', 'darwin') else os.path.join(site.getuserbase(), 'Scripts')
 
+
         os.makedirs(wrapper_dir, exist_ok=True)
 
+        # set wrapper template and extension
         wrapper_template = "pip3-wrapper.sh" if sys.platform in ('linux', 'darwin') else "pip3-wrapper.bat"
         wrapper_ext = "" if sys.platform in ('linux', 'darwin') else ".bat"
         base_path = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +33,7 @@ class AutoReq(install):
         with open(template_path) as f:
             content = f.read()
 
+        # set the wrapper path and original command path
         for cmd in ['pip', 'pip3']:
             wrapper_path = os.path.join(wrapper_dir, f"{cmd}{wrapper_ext}")
             orig_cmd_path = os.path.join(wrapper_dir, f"{cmd}-orig{wrapper_ext}")
@@ -47,6 +54,7 @@ class AutoReq(install):
 
         self.update_requirements()
 
+    # write requirements to file
     def update_requirements(self):
         try:
             req_file = os.path.join(os.getcwd(), "requirements.txt")
