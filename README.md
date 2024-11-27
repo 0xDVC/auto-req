@@ -47,7 +47,7 @@ pip uninstall areq # that simple :)
 ## LICENSE
 MIT License
 
-Copyright (c) [2024] [Neil Ohene]
+Copyright (c) 2024 Neil Ohene
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
